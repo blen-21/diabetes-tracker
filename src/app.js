@@ -3,7 +3,7 @@ const express = require("express");
 const path = require("path");
 const app = express();
 const ejs = require("ejs");
-const { User, SugarLog } = require('./mongodb');
+const { User, SugarLog, ExerciseLog } = require('./mongodb');
 const session = require("express-session");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
@@ -328,8 +328,14 @@ app.post("/submit-form", async (req, res) => {
     }
 });
 //edit profile
-app.post('/edit-profile', async (req, res) => {
-    const { username, fname, lname, age, gender } = req.body;
+/* app.post('/edit-profile', async (req, res) => {
+            // Check if the user is logged in (i.e., user ID exists in session)
+            if (!req.session.userId) {
+                return res.status(401).send('Unauthorized: Please log in');
+            }
+
+    const name = req.session.user.name;
+    const { fname, lname, age, gender } = req.body;
   
     const updateFields = {};
     if (fname) updateFields.fname = fname;
@@ -338,7 +344,7 @@ app.post('/edit-profile', async (req, res) => {
     if (gender) updateFields.gender = gender;
   
     try {
-      const result = await User.findOneAndUpdate({ username }, updateFields, { new: true });
+      const result = await User.findOneAndUpdate({ name }, updateFields, { new: true });
       if (result) {
         res.send('Profile updated successfully');
       } else {
@@ -349,11 +355,13 @@ app.post('/edit-profile', async (req, res) => {
       res.send('An error occurred while updating the profile');
     }
   });
-  
+  */
 app.get('/log-sugar', (req, res) => {
     res.render('log');  
 });
-
+app.get('/exercise-log', (req,res) =>{
+    res.render('exercise');
+});
 // POST route to log sugar levels
 app.post('/log-sugar', async (req, res) => {
     console.log("req.session",req.session)
@@ -391,7 +399,40 @@ app.post('/log-sugar', async (req, res) => {
     }
 });
 
+//post route to log daily exercise 
+app.post('/exercise-log', async (req, res) => {
+    try {
+        // Check if the user is logged in (i.e., user ID exists in session)
+        if (!req.session.userId) {
+            return res.status(401).send('Unauthorized: Please log in');
+        }
 
+        const userId = req.session.userId;  // Get user ID from session
+
+        // Capture data from req.body
+        const { typeOfExercise, duration, caloriesBurned } = req.body;
+
+        // Create a new Exercise Log entry
+        const exerciseLog = new ExerciseLog({
+            typeOfExercise,
+            duration,
+            caloriesBurned,
+            user: userId  // Linking the exercise log to the user
+        });
+
+        await exerciseLog.save();
+
+        // Updating the user with the new Exercise log
+        const user = await User.findById(userId);
+        user.exerciseLogs.push(exerciseLog._id);
+        await user.save();
+
+        res.redirect(`/profile?username=${user.name}`); // Redirect to user's profile page
+    } catch (err) {
+        console.error('Error saving exercise log:', err);
+        res.status(500).send('Server Error');
+    }
+});
 // Starting the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
