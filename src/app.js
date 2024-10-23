@@ -23,7 +23,9 @@ app.use(session({
     secret: 'aS3cUrE@!k3Y$!forSession1234$%#&',    //to generate a cryptographic hash (HMAC) for the session ID
     resave: false,     //the session is only saved if it has been modified.
     saveUninitialized: true,           //new but unmodified sessions will still be saved in the session store.
-    cookie: { secure: false }    //session cookie can be sent over both HTTP and HTTPS.
+    cookie: { 
+        maxAge: 4 * 60 * 60 * 1000  // Set session expiration time to 4 hours (in milliseconds)
+    }
 }));
 
 // Route to render the home page
@@ -145,6 +147,78 @@ app.get("/faq", (req, res) => {
         {
             question: "What are the long-term effects of diabetes?",
             answer: "Long-term effects of diabetes can include cardiovascular disease, nerve damage, kidney damage, eye damage, and increased risk of infections."
+        },
+        {
+            question: "How does exercise affect blood sugar levels?",
+            answer: "Exercise can help lower blood sugar levels by increasing insulin sensitivity and allowing cells to use glucose for energy more effectively."
+        },
+        {
+            question: "What should I eat if I have diabetes?",
+            answer: "A balanced diet with plenty of vegetables, whole grains, lean protein, and healthy fats is important. Focus on controlling carbohydrate intake and avoiding sugary foods."
+        },
+        {
+            question: "Can stress affect my blood sugar levels?",
+            answer: "Yes, stress can raise blood sugar levels by causing the body to release hormones like cortisol, which can interfere with insulin."
+        },
+        {
+            question: "What is insulin resistance?",
+            answer: "Insulin resistance occurs when the body's cells do not respond properly to insulin, making it harder for glucose to enter the cells, which can lead to elevated blood sugar levels."
+        },
+        {
+            question: "What is hypoglycemia?",
+            answer: "Hypoglycemia, or low blood sugar, occurs when your blood glucose drops below 70 mg/dL. It can cause symptoms like shakiness, sweating, confusion, and dizziness."
+        },
+        {
+            question: "How do I treat hypoglycemia?",
+            answer: "To treat hypoglycemia, consume fast-acting carbohydrates, such as glucose tablets, fruit juice, or regular soda, then check your blood sugar again after 15 minutes."
+        },
+        {
+            question: "Can children develop diabetes?",
+            answer: "Yes, children can develop both Type 1 and Type 2 diabetes. Type 1 diabetes is more common in children, but Type 2 diabetes has been increasing in children due to rising obesity rates."
+        },
+        {
+            question: "Can I have diabetes without knowing it?",
+            answer: "Yes, many people with Type 2 diabetes may not have obvious symptoms, which is why regular screenings, especially if you're at risk, are important."
+        },
+        {
+            question: "How is gestational diabetes diagnosed?",
+            answer: "Gestational diabetes is diagnosed through a glucose tolerance test during pregnancy, which measures how well your body processes sugar."
+        },
+        {
+            question: "Can people with diabetes eat fruit?",
+            answer: "Yes, people with diabetes can eat fruit, but they should be mindful of portion sizes and the carbohydrate content in fruits, which can affect blood sugar."
+        },
+        {
+            question: "How do oral diabetes medications work?",
+            answer: "Oral diabetes medications help manage blood sugar levels in different ways, such as increasing insulin sensitivity, boosting insulin production, or slowing the absorption of carbohydrates."
+        },
+        {
+            question: "What is the difference between Type 1 and Type 2 diabetes?",
+            answer: "In Type 1 diabetes, the body does not produce insulin, whereas in Type 2 diabetes, the body either doesn’t produce enough insulin or can’t use it effectively."
+        },
+        {
+            question: "Is it safe for someone with diabetes to fast?",
+            answer: "If you have diabetes and plan to fast, it’s important to consult with your healthcare provider, as fasting can cause blood sugar fluctuations that may require adjustments to your medication."
+        },
+        {
+            question: "What is prediabetes?",
+            answer: "Prediabetes is a condition where blood sugar levels are higher than normal but not high enough to be classified as Type 2 diabetes. It increases the risk of developing Type 2 diabetes."
+        },
+        {
+            question: "How does weight loss affect diabetes?",
+            answer: "Losing weight can help improve insulin sensitivity, lower blood sugar levels, and reduce the risk of developing Type 2 diabetes."
+        },
+        {
+            question: "What should I do if I have a sick day with diabetes?",
+            answer: "If you're sick and have diabetes, monitor your blood sugar more frequently, stay hydrated, and follow your healthcare provider's instructions for managing blood sugar during illness."
+        },
+        {
+            question: "Can diabetes affect mental health?",
+            answer: "Yes, diabetes can affect mental health, causing stress, anxiety, or depression. Managing a chronic condition can be challenging, and it’s important to seek support if needed."
+        },
+        {
+            question: "What is the best way to monitor my diabetes?",
+            answer: "The best way to monitor your diabetes includes regular blood sugar checks, HbA1c tests, and tracking your diet, exercise, and any symptoms. Working closely with your healthcare provider is key."
         }
     ]; 
     res.render("faq", { faqData: faqData });
