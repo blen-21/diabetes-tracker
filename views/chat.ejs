@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        .chat-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .chat-box {
+            height: 400px;
+            overflow-y: scroll;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #fafafa;
+        }
+
+        .chat-box p {
+            margin: 10px 0;
+        }
+
+        .chat-box p strong {
+            color: #333;
+        }
+
+        .chat-input-container {
+            display: flex;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        .chat-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .chat-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-box" id="chat-box">
+        <!-- Chat messages will appear here -->
+    </div>
+
+    <div class="chat-input-container">
+        <input type="text" id="chat-input" class="chat-input" placeholder="Type your message...">
+        <button class="chat-button" onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+    const chatBox = document.getElementById('chat-box');
+    const chatInput = document.getElementById('chat-input');
+
+    async function sendMessage() {
+        const userMessage = chatInput.value;
+        if (!userMessage) return; // Don't send empty messages
+
+        // Add user message to chat box
+        addMessageToChat('You', userMessage);
+        chatInput.value = '';  // Clear the input field
+
+        // Call the API to get a response from the AI
+        const aiReply = await getAIResponse(userMessage);
+
+        // Add AI reply to chat box
+        addMessageToChat('AI', aiReply);
+    }
+
+    function addMessageToChat(sender, message) {
+        const messageElement = document.createElement('p');
+        messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;  // Scroll to bottom
+    }
+
+    async function getAIResponse(message) {
+        // Replace this URL with your backend API endpoint that interacts with the AI
+        const apiUrl = 'https://your-backend-api-url.com/chat';
+
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message })
+        });
+
+        const data = await response.json();
+        return data.reply;  // Assumes the reply is in the 'reply' field of the response
+    }
+</script>
+
+</body>
+</html>
