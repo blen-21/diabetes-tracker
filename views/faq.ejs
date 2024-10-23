@@ -8,6 +8,14 @@
 </head>
 <body>
     <h1>Frequently Asked Questions about Diabetes</h1>
+
+    <!-- Search form -->
+    <div class="search-container">
+        <input type="text" id="faq-search" placeholder="Search FAQs..." />
+        <button id="search-button">Search</button>
+    </div>
+ <!-- No results message -->
+ <p id="no-results" style="display: none;">No results found</p>
     <div class="faq-container">
         <% faqData.forEach(function(faq, index) { %>
             <div class="faq-item">
@@ -16,6 +24,8 @@
             </div>
         <% }); %>
     </div>
+
     <script src="/js/faq.js"></script>
 </body>
 </html>
+

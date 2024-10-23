@@ -47,7 +47,11 @@ const sugarLogSchema = new Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, 
     date: { type: Date, default: Date.now },
     timeOfDay: { type: String, required: true }, 
+
     sugarLevel: { type: String, required: false }, 
+
+    sugarLevel: { type: Number, required: true }, 
+
     notes: { type: String } 
 });
 

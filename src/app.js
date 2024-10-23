@@ -149,6 +149,9 @@ app.get("/faq", (req, res) => {
     ]; 
     res.render("faq", { faqData: faqData });
 });
+app.get('/chat', (req,res) =>{
+    res.render('chat');
+});
 //Route to render the profile page
 app.get('/profile', async (req, res) => {
     try {
@@ -226,14 +229,22 @@ app.post("/signup", async (req, res) => {
 
         // Storing user data in the session (automatic login)
         req.session.user = {
-            id: newUser._id,
+            userId: newUser._id,
             name: newUser.name,
         };
+
     if(newUser){
         req.session.userId = newUser._id,
         console.log('User logged in with ID:', req.session.userId);
     }
   
+
+
+         
+      if(newUser){
+        req.session.userId = newUser._id,
+        console.log('User logged in with ID:', req.session.userId);
+    }
 
 
         // Redirecting to the form page after signup
@@ -351,7 +362,6 @@ app.post('/log-sugar', async (req, res) => {
         // Check if the user is logged in (i.e., user ID exists in session)
         if (!req.session.userId) {
             return res.status(401).send('Unauthorized: Please log in');
-            console.log(req.session.userId)
         }
 
         const userId = req.session.userId;  // Get user ID from session
