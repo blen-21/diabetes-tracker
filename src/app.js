@@ -205,10 +205,10 @@ app.post("/signup", async (req, res) => {
         }
 
         // Password validation: At least 8 characters, containing both letters and numbers
-        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-        if (!passwordRegex.test(password)) {
-            return res.render("signup", { error: "Password must be at least 8 characters long and contain both letters and numbers." });
-        }
+        // const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+        // if (!passwordRegex.test(password)) {
+        //     return res.render("signup", { error: "Password must be at least 8 characters long and contain both letters and numbers." });
+        // }
 
         // Hashing the password
         const saltRounds = 10; // Define saltRounds
@@ -229,6 +229,12 @@ app.post("/signup", async (req, res) => {
             id: newUser._id,
             name: newUser.name,
         };
+    if(newUser){
+        req.session.userId = newUser._id,
+        console.log('User logged in with ID:', req.session.userId);
+    }
+  
+
 
         // Redirecting to the form page after signup
         res.redirect(`/form`);
@@ -339,6 +345,8 @@ app.get('/log-sugar', (req, res) => {
 
 // POST route to log sugar levels
 app.post('/log-sugar', async (req, res) => {
+    console.log("req.session",req.session)
+    console.log("req.bodu",req.body)
     try {
         // Check if the user is logged in (i.e., user ID exists in session)
         if (!req.session.userId) {
@@ -349,11 +357,11 @@ app.post('/log-sugar', async (req, res) => {
         const userId = req.session.userId;  // Get user ID from session
 
         // Capture data from req.body
-        const { level, timeOfDay, notes } = req.body;
+        const { sugarLevel, timeOfDay, notes } = req.body;
 
         // Create a new SugarLog entry
         const sugarLog = new SugarLog({
-            level,
+            sugarLevel,
             timeOfDay,
             notes,
             user: userId  // Linking the sugar log to the user
