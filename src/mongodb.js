@@ -39,6 +39,12 @@ const LogInSchema = new Schema({
   gender:{
     type: String
   },
+  type:{
+    type: String
+  },
+  weight:{
+    type: Number
+  },
   sugarLogs:[{ type: Schema.Types.ObjectId, ref: 'SugarLog' }], // Array of references to SugarLog
   exerciseLogs: [{type: Schema.Types.ObjectId, ref: 'ExerciseLog' }] // Array of references to ExerciseLog
 });

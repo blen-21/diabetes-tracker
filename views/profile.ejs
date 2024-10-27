@@ -19,8 +19,9 @@
             <div class="profile-field"> <span><%= gender %></span></div>
         </div>
         <a href="/logout" class="logout-button">Logout</a>
-        <form action="/delete-account" method="POST">
-            <button type="submit" class="delete-button">Delete Account</button>
+
+        <form action="/delete" method="POST">
+            <button type="submit" class="delete-button" onclick="return confirm('Are you sure you want to delete your account? This action cannot be undone.')">Delete Account</button>
         </form>
         
     </div>

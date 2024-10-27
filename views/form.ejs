@@ -37,7 +37,9 @@
             <option value="31-40">31-40</option>
             <option value="41-50">41-50</option>
         </select>
-    
+        <!-- Weight input -->
+         <label for="weight">Weight in kilograms(Kg): </label>
+         <input name="weight" id="weight" placeholder="Enter your weight" required>
         <!-- Gender Option -->
         <label for="gender">Gender:</label>
         <select name="gender" id="gender" required>
@@ -45,6 +47,13 @@
             <option value="male">Male</option>
             <option value="female">Female</option>
         </select>
+        <!-- Type Option -->
+        <select name="type" id="type" required>
+            <option value="" disabled selected>Select your type of diabetes</option>
+            <option value="type1">Type 1</option>
+            <option value="type2">Type 2</option>
+        </select>
+        <!-- Related Diseases -->
         <div class="disease">
             <label for="related-diseases">Select any related diseases or conditions you have:</label>
             

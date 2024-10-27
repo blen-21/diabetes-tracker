@@ -368,7 +368,7 @@ app.post("/login", async (req, res) => {
 });
 app.post("/submit-form", async (req, res) => {
     try {
-        const { fname, lname, diseases, age, gender } = req.body;
+        const { fname, lname, diseases, age, gender,type,weight } = req.body;
         const username = req.session.user.name; 
 
         // Finding the user by their username
@@ -384,6 +384,8 @@ app.post("/submit-form", async (req, res) => {
         user.diseases = diseases || []; // Default to an empty array if no diseases are selected
         user.age = age;
         user.gender = gender;
+        user.type = type;
+        user.weight = weight;
         // Saving the updated document
         await user.save();
 
@@ -401,6 +403,38 @@ app.post("/submit-form", async (req, res) => {
         res.render("form", { error: "An error occurred while submitting the form. Please try again." });
     }
 });
+
+//delete-account
+
+app.post('/delete', async (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).send('Unauthorized, please login again'); // Redirect to login if not authenticated
+    }
+
+    try {
+        const userId = req.session.userId;
+
+        // Delete all sugar logs related to the user
+        await SugarLog.deleteMany({ user: userId });
+
+        // Delete all exercise logs related to the user
+        await ExerciseLog.deleteMany({ user: userId });
+
+        // Delete the user's account
+        await User.findByIdAndDelete(userId);
+
+        // Clear session and redirect
+        req.session.destroy(() => {
+            res.render('messages', {messages: {success: 'Account successfully deleted'} }); // Redirect to confirmation page
+        });
+    } catch (error) {
+        console.error('Error deleting user account:', error);
+        res.render('messages', { messages: { error: 'Failed to delete account'} })
+    }
+});
+
+
+
 //edit profile
 /* app.post('/edit-profile', async (req, res) => {
             // Check if the user is logged in (i.e., user ID exists in session)
@@ -443,7 +477,7 @@ app.post('/log-sugar', async (req, res) => {
     try {
         // Check if the user is logged in (i.e., user ID exists in session)
         if (!req.session.userId) {
-            return res.status(401).send('Unauthorized: Please log in');
+            res.render('messages', { messages: { error: 'Unauthorized, please login'} })
         }
 
         const userId = req.session.userId;  // Get user ID from session
@@ -469,7 +503,7 @@ app.post('/log-sugar', async (req, res) => {
         res.redirect(`/profile?username=${user.name}`); // Redirect to user's profile page
     } catch (err) {
         console.error('Error saving sugar log:', err);
-        res.status(500).send('Server Error');
+        res.render('messages', { messages: { error: 'Server Error'} })
     }
 });
 
@@ -478,7 +512,7 @@ app.post('/exercise-log', async (req, res) => {
     try {
         // Check if the user is logged in (i.e., user ID exists in session)
         if (!req.session.userId) {
-            return res.status(401).send('Unauthorized: Please log in');
+            res.render('messages', { messages: { error: 'Unauthorized, please login'} })
         }
 
         const userId = req.session.userId;  // Get user ID from session
@@ -504,7 +538,7 @@ app.post('/exercise-log', async (req, res) => {
         res.redirect(`/profile?username=${user.name}`); // Redirect to user's profile page
     } catch (err) {
         console.error('Error saving exercise log:', err);
-        res.status(500).send('Server Error');
+        res.render('messages', { messages: { error: 'Server Error'} })
     }
 });
 // Starting the server
