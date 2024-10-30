@@ -46,7 +46,8 @@ const LogInSchema = new Schema({
     type: Number
   },
   sugarLogs:[{ type: Schema.Types.ObjectId, ref: 'SugarLog' }], // Array of references to SugarLog
-  exerciseLogs: [{type: Schema.Types.ObjectId, ref: 'ExerciseLog' }] // Array of references to ExerciseLog
+  exerciseLogs: [{type: Schema.Types.ObjectId, ref: 'ExerciseLog' }], // Array of references to ExerciseLog
+  medicationLogs: [{type: Schema.Types.ObjectId, ref: 'MedicationLog' }] // Array of references to ExerciseLog
 });
 
 const User = mongoose.model("User", LogInSchema);
@@ -75,10 +76,22 @@ const exerciseLogSchema = new Schema({
   caloriesBurned: {type: Number}
 
 });
-
 const ExerciseLog = mongoose.model('ExerciseLog', exerciseLogSchema);
+
+//Medication Log Schema
+const medicationLogSchema = new Schema({
+
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
+  medName: {type: String, required: true},
+  frequency: {type: String, required: true},
+  time: {type: String, required: true}
+
+});
+const MedicationLog = mongoose.model('MedicationLog', medicationLogSchema);
+
 module.exports = {
   User,
   SugarLog,
-  ExerciseLog
+  ExerciseLog,
+  MedicationLog
 };

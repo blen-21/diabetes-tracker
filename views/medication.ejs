@@ -11,25 +11,24 @@
     <div class="container">
         <h1>Set Your Medication Reminder</h1>
         
-        <form id="reminder-form">
+        <form id="reminder-form" action="/medication-log" method="POST">
             <div class="form-group">
-                <label for="medication-name">Medication Name:</label>
-                <input type="text" id="medication-name" name="medication-name" required>
+                <label for="medName">Medication Name:</label>
+                <input type="text" id="medName" name="medName" required>
             </div>
 
             <div class="form-group">
-                <label for="reminder-time">Reminder Time:</label>
-                <input type="time" id="reminder-time" name="reminder-time" required>
+                <label for="time">Reminder Time:</label>
+                <input type="time" id="time" name="time" required>
             </div>
 
             <div class="form-group">
-                <label for="reminder-frequency">Frequency:</label>
-                <select id="reminder-frequency" name="reminder-frequency">
+                <label for="frequency">Frequency:</label>
+                <select id="frequency" name="frequency">
                     <option value="daily">Daily</option>
                     <option value="weekly">Weekly</option>
                 </select>
             </div>
-            <button type="button" id="add-reminder">+ Add Another Reminder</button><br>
             <button id="submit" type="submit">Set Reminder</button>
         </form>
 
@@ -40,5 +39,9 @@
             </ul>
         </div>
     </div>
+
+    <script>
+
+    </script>
 </body>
 </html>

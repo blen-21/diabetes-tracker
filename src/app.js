@@ -3,7 +3,7 @@ const express = require("express");
 const path = require("path");
 const app = express();
 const ejs = require("ejs");
-const { User, SugarLog, ExerciseLog } = require('./mongodb');
+const { User, SugarLog, ExerciseLog, MedicationLog } = require('./mongodb');
 const session = require("express-session");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
@@ -541,6 +541,42 @@ app.post('/exercise-log', async (req, res) => {
         res.render('messages', { messages: { error: 'Server Error'} })
     }
 });
+
+//post route to log daily medication 
+app.post('/medication-log', async (req, res) => {
+    try {
+        // Check if the user is logged in (i.e., user ID exists in session)
+        if (!req.session.userId) {
+            res.render('messages', { messages: { error: 'Unauthorized, please login'} })
+        }
+
+        const userId = req.session.userId;  // Get user ID from session
+
+        // Capture data from req.body
+        const { medName, frequency, time } = req.body;
+
+        // Create a new Medication Log entry
+        const medicationLog = new MedicationLog({
+            medName,
+            time,
+            frequency,
+            user: userId  // Linking the medication log to the user
+        });
+
+        await medicationLog.save();
+
+        // Updating the user with the new log
+        const user = await User.findById(userId);
+        user.medicationLogs.push(medicationLog._id);
+        await user.save();
+
+        res.redirect(`/profile?username=${user.name}`); // Redirect to user's profile page
+    } catch (err) {
+        console.error('Error saving the new medication:', err);
+        res.render('messages', { messages: { error: 'Server Error'} })
+    }
+});
+
 // Starting the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
