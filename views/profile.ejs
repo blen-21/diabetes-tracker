@@ -114,5 +114,20 @@
             <a href="/contact">Contact Us</a>
         </div>
     </footer>
+    <script>
+        async function fetchData() {
+            try {
+                const response = await fetch('/user/userId/aggregate'); // Replace '12345' with actual user ID or dynamically set it
+                if (!response.ok) throw new Error("Failed to fetch data");
+        
+                const data = await response.json();
+                console.log(data); // Check data format in console if needed
+                return data;
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+        
+    </script>
 </body>
 </html>

@@ -578,6 +578,52 @@ app.post('/medication-log', async (req, res) => {
     }
 });
 
+//Data aggregation
+
+const mongoose = require("mongoose");
+const UserData = mongoose.model("UserData");  // Replace with your actual model name
+
+async function aggregateDailyData(userId) {
+    try {
+        const data = await UserData.aggregate([
+            { $match: { userId: mongoose.Types.ObjectId(userId) } }, // Filter for the specific user
+            {
+                $group: {
+                    _id: { date: { $dateToString: { format: "%Y-%m-%d", date: "$entryDate" } } }, // Group by date
+                    averageSugarLevel: { $avg: "$sugarLevel" },  // Calculate average sugar level per day
+                    totalCaloriesBurned: { $sum: "$caloriesBurned" } // Calculate total calories burned per day
+                }
+            },
+            { $sort: { "_id.date": 1 } }, // Sort by date
+            {
+                $project: {
+                    _id: 0,
+                    date: "$_id.date",
+                    averageSugarLevel: 1,
+                    totalCaloriesBurned: 1
+                }
+            }
+        ]);
+
+        return data;  // Array of objects, each with date, averageSugarLevel, and totalCaloriesBurned
+    } catch (error) {
+        console.error("Aggregation error:", error);
+        throw error;
+    }
+}
+
+//fetching the data to json file
+
+app.get('/user/:userId/aggregate', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const aggregatedData = await aggregateDailyData(userId);
+        res.json(aggregatedData);  // Send JSON data to frontend
+    } catch (error) {
+        res.status(500).json({ error: "Could not fetch data" });
+    }
+});
+
 // Starting the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
