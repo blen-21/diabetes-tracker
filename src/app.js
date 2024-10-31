@@ -525,6 +525,7 @@ app.post('/exercise-log', async (req, res) => {
             typeOfExercise,
             duration,
             caloriesBurned,
+            dateCollected: new Date(),
             user: userId  // Linking the exercise log to the user
         });
 

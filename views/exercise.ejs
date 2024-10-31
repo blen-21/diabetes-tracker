@@ -10,6 +10,8 @@
     <div class="container">
         <h1>Daily exercise tracker</h1>
         <form action="/exercise-log" method="POST" id="exerciseForm">
+            <label>Weight</label>
+            <input type="number" id="weight" placeholder="Enter your current weight" required>
             <label for="typeOfExercise">Type Of Physical Activity:</label>
             <select name="typeOfExercise" id="typeOfExercise" required>
                 <option value="" disabled selected>Select a type</option>
@@ -20,54 +22,55 @@
                 <option value="Plyometrics">Plyometrics</option>
                 <option value="Yoga">Yoga and Pilates</option>
             </select>
-    
+        
             <label for="duration">Time Duration (minutes):</label>
             <input type="number" name="duration" id="duration" placeholder="Enter the duration of the exercise" required>
-    
-            <!-- Calories Burned Section -->
-            <label for="caloriesBurned">Estimated Calories Burned:</label>
-            <input type="text" id="caloriesBurned" readonly>
-    
+        <!-- Hidden input for calories burned -->
+            <input type="hidden" name="caloriesBurned" id="caloriesBurned">
             <button id="submit" type="submit">Log exercise</button>
         </form>
-    </div>
+          </div>
     
     <script>
-        document.getElementById("exerciseForm").addEventListener("input", calculateCalories);
-    
-        function calculateCalories() {
+        document.getElementById("exerciseForm").addEventListener("submit", function(event) {
             const typeOfExercise = document.getElementById("typeOfExercise").value;
             const duration = parseInt(document.getElementById("duration").value);
-            
+            const weight = parseInt(document.getElementById("weight").value);
+        
+            const referenceWeight = 70;
             let caloriesPerMinute;
-    
+        
             switch (typeOfExercise) {
                 case "Aerobic":
-                    caloriesPerMinute = 8; // Example value for aerobic exercises
+                    caloriesPerMinute = 8;
                     break;
                 case "Strength":
-                    caloriesPerMinute = 6; // Example value for strength training
+                    caloriesPerMinute = 6;
                     break;
                 case "Flexibility":
-                    caloriesPerMinute = 3; // Example value for flexibility exercises
+                    caloriesPerMinute = 3;
                     break;
                 case "Endurance":
-                    caloriesPerMinute = 9; // Example value for endurance training
+                    caloriesPerMinute = 9;
                     break;
                 case "Plyometrics":
-                    caloriesPerMinute = 10; // Example value for plyometrics
+                    caloriesPerMinute = 10;
                     break;
                 case "Yoga":
-                    caloriesPerMinute = 4; // Example value for yoga and pilates
+                    caloriesPerMinute = 4;
                     break;
                 default:
                     caloriesPerMinute = 0;
             }
-    
+        
             // Calculate calories burned
-            const caloriesBurned = duration && typeOfExercise ? duration * caloriesPerMinute : 0;
-            document.getElementById("caloriesBurned").value = caloriesBurned ? `${caloriesBurned} kcal` : '';
-        }
+            const caloriesBurned = duration && typeOfExercise ? duration * caloriesPerMinute * (weight / referenceWeight) : 0;
+        
+            // Set the value of the hidden input
+            document.getElementById("caloriesBurned").value = caloriesBurned;
+        });
+        
+        
     </script>
     
 </body>

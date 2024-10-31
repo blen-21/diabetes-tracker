@@ -73,8 +73,8 @@ const exerciseLogSchema = new Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
   typeOfExercise: {type: String, required: true },
   duration: {type: Number, required: true},
-  caloriesBurned: {type: Number}
-
+  caloriesBurned: {type: Number},
+  dateCollected: {type: Date, default: Date.now}
 });
 const ExerciseLog = mongoose.model('ExerciseLog', exerciseLogSchema);
 
