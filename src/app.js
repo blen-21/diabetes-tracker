@@ -242,7 +242,7 @@ app.get('/profile', async (req, res) => {
                 gender: user.gender,
                 diseases: user.diseases || []
             });
-        }
+        } 
     } catch (err) {
         console.log(err);
         res.status(500).send('An error occurred.');
@@ -436,7 +436,7 @@ app.post('/delete', async (req, res) => {
 
 
 //edit profile
-/* app.post('/edit-profile', async (req, res) => {
+ app.post('/edit-profile', async (req, res) => {
             // Check if the user is logged in (i.e., user ID exists in session)
             if (!req.session.userId) {
                 return res.status(401).send('Unauthorized: Please log in');
@@ -444,7 +444,7 @@ app.post('/delete', async (req, res) => {
 
     const name = req.session.user.name;
     const { fname, lname, age, gender } = req.body;
-  
+  console.log("profile",req.body)
     const updateFields = {};
     if (fname) updateFields.fname = fname;
     if (lname) updateFields.lname = lname;
@@ -463,7 +463,7 @@ app.post('/delete', async (req, res) => {
       res.send('An error occurred while updating the profile');
     }
   });
-  */
+  
 app.get('/log-sugar', (req, res) => {
     res.render('log');  
 });
