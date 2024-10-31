@@ -436,40 +436,38 @@ app.post('/delete', async (req, res) => {
 
 
 //edit profile
- app.post('/edit-profile', async (req, res) => {
-            // Check if the user is logged in (i.e., user ID exists in session)
-            if (!req.session.userId) {
-                return res.status(401).send('Unauthorized: Please log in');
-            }
+app.post('/edit-profile', async (req, res) => {
+    // Check if the user is logged in (i.e., user ID exists in session)
+    if (!req.session.userId) {
+        res.render('messages', { messages: { error: 'Unauthorized, please login'} })
+    }
 
-    const name = req.session.user.name;
     const { fname, lname, age, gender } = req.body;
-  console.log("profile",req.body)
+    console.log("Profile data:", req.body);
+    console.log("Session user ID:", req.session.userId); // Log user ID
+
     const updateFields = {};
     if (fname) updateFields.fname = fname;
     if (lname) updateFields.lname = lname;
     if (age) updateFields.age = age;
     if (gender) updateFields.gender = gender;
-  
+
     try {
-      const result = await User.findOneAndUpdate({ name }, updateFields, { new: true });
-      if (result) {
-        res.send('Profile updated successfully');
-      } else {
-        res.send('User not found');
-      }
+        const userId = req.session.userId;
+        const result = await User.findByIdAndUpdate(userId, updateFields, { new: true });
+        
+        if (result) {
+            res.render('messages', { messages: { success: 'Profile updated successfully'} })
+        } else {
+            console.log("User not found with ID:", userId); // Log if user not found
+            res.render('messages', { messages: { error: 'User not found'} })
+        }
     } catch (error) {
-      console.error(error);
-      res.send('An error occurred while updating the profile');
+        console.error("Error updating profile:", error);
+        res.render('messages', { messages: { error: 'An error occurred while updating the profile'} })
     }
-  });
-  
-app.get('/log-sugar', (req, res) => {
-    res.render('log');  
 });
-app.get('/exercise-log', (req,res) =>{
-    res.render('exercise');
-});
+
 // POST route to log sugar levels
 app.post('/log-sugar', async (req, res) => {
     console.log("req.session",req.session)
@@ -581,7 +579,7 @@ app.post('/medication-log', async (req, res) => {
 //Data aggregation
 
 const mongoose = require("mongoose");
-const UserData = mongoose.model("UserData");  // Replace with your actual model name
+const UserData = mongoose.model("User");  // Replace with your actual model name
 
 async function aggregateDailyData(userId) {
     try {
