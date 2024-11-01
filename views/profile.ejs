@@ -105,6 +105,19 @@
            
         </div>
     </div>
+    <h2>Daily Health Summary</h2>
+<ul>
+    <% if (aggregatedData && aggregatedData.length > 0) { %>
+        <% aggregatedData.forEach((data) => { %>
+            <li><strong>Date:</strong> <%= data.date %></li>
+            <li><strong>Average Sugar Level:</strong> <%= data.averageSugarLevel %></li>
+            <li><strong>Calories Burned:</strong> <%= data.totalCaloriesBurned %></li>
+        <% }) %>
+    <% } else { %>
+        <p>No aggregated data available.</p>
+    <% } %>
+</ul>
+
 
     </main>
     <footer>

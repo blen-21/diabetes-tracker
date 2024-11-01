@@ -229,22 +229,32 @@ app.get('/chat', (req,res) =>{
 //Route to render the profile page
 app.get('/profile', async (req, res) => {
     try {
+        // Find user profile by username
         const user = await User.findOne({ name: req.query.username });
+        
         if (!user) {
             return res.status(404).send("User not found.");
         }
-        else{
-            res.render('profile', {
-                username: user.name,
-                fname: user.fname,
-                lname: user.lname,
-                age: user.age,
-                gender: user.gender,
-                diseases: user.diseases || []
-            });
-        } 
+
+        // Get user ID directly; it's already an ObjectId
+        const userId = user._id;
+
+        // Fetch aggregated daily data for the user
+        const aggregatedData = await aggregateDailyData(userId);
+
+        // Render profile page with user profile and aggregated data
+        console.log("Aggregated Data:", aggregatedData);
+        res.render('profile', {
+            username: user.name,
+            fname: user.fname,
+            lname: user.lname,
+            age: user.age,
+            gender: user.gender,
+            diseases: user.diseases || [],
+            aggregatedData: aggregatedData 
+        });
     } catch (err) {
-        console.log(err);
+        console.error(err);
         res.status(500).send('An error occurred.');
     }
 });
@@ -576,51 +586,57 @@ app.post('/medication-log', async (req, res) => {
     }
 });
 
-//Data aggregation
-
-const mongoose = require("mongoose");
-const UserData = mongoose.model("User");  // Replace with your actual model name
-
-async function aggregateDailyData(userId) {
+const aggregateDailyData = async (userId) => {
     try {
-        const data = await UserData.aggregate([
-            { $match: { userId: mongoose.Types.ObjectId(userId) } }, // Filter for the specific user
+        console.log("Starting aggregation for userId:", userId);
+
+        const data = await SugarLog.aggregate([
+            {
+                $match: { user: userId } // Match by `user` field in SugarLog
+            },
             {
                 $group: {
-                    _id: { date: { $dateToString: { format: "%Y-%m-%d", date: "$entryDate" } } }, // Group by date
-                    averageSugarLevel: { $avg: "$sugarLevel" },  // Calculate average sugar level per day
-                    totalCaloriesBurned: { $sum: "$caloriesBurned" } // Calculate total calories burned per day
-                }
-            },
-            { $sort: { "_id.date": 1 } }, // Sort by date
-            {
-                $project: {
-                    _id: 0,
-                    date: "$_id.date",
-                    averageSugarLevel: 1,
-                    totalCaloriesBurned: 1
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }, // Group by date
+                    averageSugarLevel: { $avg: "$sugarLevel" }
                 }
             }
         ]);
 
-        return data;  // Array of objects, each with date, averageSugarLevel, and totalCaloriesBurned
+        console.log("Sugar log aggregation result:", data);
+
+        const exerciseData = await ExerciseLog.aggregate([
+            {
+                $match: { user: userId } // Match by `user` field in ExerciseLog
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$dateCollected" } }, // Group by date
+                    totalCaloriesBurned: { $sum: "$caloriesBurned" }
+                }
+            }
+        ]);
+
+        console.log("Exercise log aggregation result:", exerciseData);
+
+        // Combine results if necessary, or return them separately
+        const combinedData = data.map((sugarLog) => {
+            const exerciseLog = exerciseData.find(log => log._id === sugarLog._id) || { totalCaloriesBurned: 0 };
+            return {
+                date: sugarLog._id,
+                averageSugarLevel: sugarLog.averageSugarLevel,
+                totalCaloriesBurned: exerciseLog.totalCaloriesBurned
+            };
+        });
+
+        console.log("Combined aggregation result:", combinedData);
+        return combinedData;
+
     } catch (error) {
         console.error("Aggregation error:", error);
         throw error;
     }
-}
+};
 
-//fetching the data to json file
-
-app.get('/user/:userId/aggregate', async (req, res) => {
-    try {
-        const userId = req.params.userId;
-        const aggregatedData = await aggregateDailyData(userId);
-        res.json(aggregatedData);  // Send JSON data to frontend
-    } catch (error) {
-        res.status(500).json({ error: "Could not fetch data" });
-    }
-});
 
 // Starting the server
 const PORT = process.env.PORT || 3000;
