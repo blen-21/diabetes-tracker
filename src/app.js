@@ -229,21 +229,18 @@ app.get('/chat', (req,res) =>{
 //Route to render the profile page
 app.get('/profile', async (req, res) => {
     try {
-        // Find user profile by username
         const user = await User.findOne({ name: req.query.username });
         
         if (!user) {
             return res.status(404).send("User not found.");
         }
 
-        // Get user ID directly; it's already an ObjectId
         const userId = user._id;
-
-        // Fetch aggregated daily data for the user
         const aggregatedData = await aggregateDailyData(userId);
 
-        // Render profile page with user profile and aggregated data
+        // Log aggregated data to confirm it has values
         console.log("Aggregated Data:", aggregatedData);
+
         res.render('profile', {
             username: user.name,
             fname: user.fname,
@@ -251,13 +248,14 @@ app.get('/profile', async (req, res) => {
             age: user.age,
             gender: user.gender,
             diseases: user.diseases || [],
-            aggregatedData: aggregatedData 
-        });
+            aggregatedData: aggregatedData,
+            userId: userId.toString()});
     } catch (err) {
         console.error(err);
         res.status(500).send('An error occurred.');
     }
 });
+
 
 app.get('/submit-form', (req, res) => {
     res.redirect(`/form?username=${req.session.user.name}`);
@@ -588,8 +586,8 @@ app.post('/medication-log', async (req, res) => {
 
 const aggregateDailyData = async (userId) => {
     try {
-        console.log("Starting aggregation for userId:", userId);
-
+        console.log("Starting aggregation for userId:", userId)
+        // Aggregating sugar log data
         const data = await SugarLog.aggregate([
             {
                 $match: { user: userId } // Match by `user` field in SugarLog
@@ -601,9 +599,9 @@ const aggregateDailyData = async (userId) => {
                 }
             }
         ]);
-
         console.log("Sugar log aggregation result:", data);
 
+        // Aggregating exercise log data
         const exerciseData = await ExerciseLog.aggregate([
             {
                 $match: { user: userId } // Match by `user` field in ExerciseLog
@@ -615,10 +613,15 @@ const aggregateDailyData = async (userId) => {
                 }
             }
         ]);
-
         console.log("Exercise log aggregation result:", exerciseData);
 
-        // Combine results if necessary, or return them separately
+        // Handle cases where either data set is empty
+        if (data.length === 0 && exerciseData.length === 0) {
+            console.log("No data available for the given userId.");
+            return []; // Return an empty array if both are empty
+        }
+
+        // Combine results
         const combinedData = data.map((sugarLog) => {
             const exerciseLog = exerciseData.find(log => log._id === sugarLog._id) || { totalCaloriesBurned: 0 };
             return {
@@ -628,15 +631,37 @@ const aggregateDailyData = async (userId) => {
             };
         });
 
+        // Handle cases where only exercise data is present
+        if (exerciseData.length > 0 && combinedData.length === 0) {
+            // If no sugar log data exists, create combined entries based on exercise data
+            return exerciseData.map(exerciseLog => ({
+                date: exerciseLog._id,
+                averageSugarLevel: null, // No sugar log data
+                totalCaloriesBurned: exerciseLog.totalCaloriesBurned
+            }));
+        }
+
         console.log("Combined aggregation result:", combinedData);
         return combinedData;
-
     } catch (error) {
         console.error("Aggregation error:", error);
         throw error;
     }
 };
 
+
+app.get('/user/:userId/aggregate', async (req, res) => {
+    const userId = req.params.userId; // Get userId from the route parameters
+    console.log("Received request to /user/:userId/aggregate for userId:", userId);
+    try {
+        const aggregatedData = await aggregateDailyData(userId); // Call the aggregation function
+        console.log("Sending aggregated data:", aggregatedData);
+        res.json(aggregatedData); // Return the aggregated data as JSON
+    } catch (err) {
+        console.error("Error in aggregation route:", err);
+        res.status(500).json({ error: "An error occurred while fetching data." });
+    }
+});
 
 // Starting the server
 const PORT = process.env.PORT || 3000;
