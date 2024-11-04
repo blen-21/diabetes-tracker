@@ -6,6 +6,7 @@ const ejs = require("ejs");
 const { User, SugarLog, ExerciseLog, MedicationLog } = require('./mongodb');
 const session = require("express-session");
 const bcrypt = require("bcrypt");
+const { default: mongoose } = require("mongoose");
 const saltRounds = 10;
 
 // Middleware to parse JSON and URL-encoded data
@@ -585,6 +586,7 @@ app.post('/medication-log', async (req, res) => {
 });
 
 const aggregateDailyData = async (userId) => {
+    
     try {
         console.log("Starting aggregation for userId:", userId)
         // Aggregating sugar log data
@@ -651,12 +653,66 @@ const aggregateDailyData = async (userId) => {
 
 
 app.get('/user/:userId/aggregate', async (req, res) => {
-    const userId = req.params.userId; // Get userId from the route parameters
+    const userId = req.params.userId; 
+ const userObjectId = new mongoose.Types.ObjectId(userId);
+  
     console.log("Received request to /user/:userId/aggregate for userId:", userId);
     try {
-        const aggregatedData = await aggregateDailyData(userId); // Call the aggregation function
-        console.log("Sending aggregated data:", aggregatedData);
-        res.json(aggregatedData); // Return the aggregated data as JSON
+        const data = await SugarLog.aggregate([
+            {
+                $match: { user:userObjectId } // Match by `user` field in SugarLog
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }, // Group by date
+                    averageSugarLevel: { $avg: "$sugarLevel" }
+                }
+            }
+        ]);
+        console.log("Sugar log aggregation result:", data);
+
+        const exerciseData = await ExerciseLog.aggregate([
+            {
+                $match: { user: userObjectId } // Match by `user` field in ExerciseLog
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$dateCollected" } }, // Group by date
+                    totalCaloriesBurned: { $sum: "$caloriesBurned" }
+                }
+            }
+        ]);
+        console.log("Exercise log aggregation result:", exerciseData);
+
+        // Handle cases where either data set is empty
+        if (data.length === 0 && exerciseData.length === 0) {
+            console.log("No data available for the given userId.");
+            return []; // Return an empty array if both are empty
+        }
+
+        // Combine results
+        const combinedData = data.map((sugarLog) => {
+            const exerciseLog = exerciseData.find(log => log._id === sugarLog._id) || { totalCaloriesBurned: 0 };
+            return {
+                date: sugarLog._id,
+                averageSugarLevel: sugarLog.averageSugarLevel,
+                totalCaloriesBurned: exerciseLog.totalCaloriesBurned
+            };
+        });
+
+        // Handle cases where only exercise data is present
+        if (exerciseData.length > 0 && combinedData.length === 0) {
+            // If no sugar log data exists, create combined entries based on exercise data
+            return exerciseData.map(exerciseLog => ({
+                date: exerciseLog._id,
+                averageSugarLevel: null, // No sugar log data
+                totalCaloriesBurned: exerciseLog.totalCaloriesBurned
+            }));
+        }
+
+        console.log("Combined aggregation result:...............", combinedData);
+
+        res.json(combinedData); // Return the aggregated data as JSON
     } catch (err) {
         console.error("Error in aggregation route:", err);
         res.status(500).json({ error: "An error occurred while fetching data." });

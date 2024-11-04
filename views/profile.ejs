@@ -8,9 +8,9 @@
     <script src="/js/profile.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+async function initChart() {
         async function fetchData() {
-            const userId = "<%= userId %>"; // Access userId passed from the server
+            const userId = "<%= userId %>"; 
             console.log("Fetching data for user ID:", userId); 
             try {
                 const response = await fetch(`/user/${userId}/aggregate`);
@@ -24,56 +24,50 @@
             }
         }
     
-        async function initChart() {
-            console.log("Initializing chart...");
-            const aggregatedData = [
-        { "date": "2024-11-01", "averageSugarLevel": 100, "totalCaloriesBurned": 200 },
-        { "date": "2024-11-02", "averageSugarLevel": 110, "totalCaloriesBurned": 250 },
-        { "date": "2024-11-02", "averageSugarLevel": 130, "totalCaloriesBurned": 50 },
-        { "date": "2024-11-02", "averageSugarLevel": 90, "totalCaloriesBurned": 300 }
-        ];
-            if (aggregatedData) {
-                const labels = aggregatedData.map(data => data.date);
-                const sugarLevels = aggregatedData.map(data => data.averageSugarLevel);
-                const caloriesBurned = aggregatedData.map(data => data.totalCaloriesBurned);
-    
-                const ctx = document.getElementById('sugarCalorieChart').getContext('2d');
-                const sugarCalorieChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                label: 'Average Sugar Level',
-                                data: sugarLevels,
-                                borderColor: 'rgba(255, 99, 132, 1)',
-                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                                fill: true
-                            },
-                            {
-                                label: 'Total Calories Burned',
-                                data: caloriesBurned,
-                                borderColor: 'rgba(54, 162, 235, 1)',
-                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                                fill: true
-                            }
-                        ]
+ 
+    console.log("Initializing chart with data:", await fetchData());
+const aggregatedData= await fetchData()
+    if (aggregatedData) {
+        const labels = aggregatedData?.map(data => data.date);
+        const sugarLevels = aggregatedData?.map(data => data.averageSugarLevel);
+        const caloriesBurned = aggregatedData?.map(data => data.totalCaloriesBurned);
+
+        const ctx = document.getElementById('sugarCalorieChart').getContext('2d');
+        const sugarCalorieChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Average Sugar Level',
+                        data: sugarLevels,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        fill: true
                     },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
+                    {
+                        label: 'Total Calories Burned',
+                        data: caloriesBurned,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        fill: true
                     }
-                });
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
             }
-        }
-    
-        // Calling the initChart function when the window loads
-        initChart();
-    });
+        });
+    }
+}
+
+// Calling the initChart function when the window loads
+window.onload = initChart;
     </script>
 </head>
 <body>
@@ -175,7 +169,7 @@
         </div>
     </div>
     <h2>Daily Health Summary</h2>
-    <canvas id="sugarCalorieChart" width="400" height="200"></canvas>
+    <canvas id="sugarCalorieChart" width="400" height="100"></canvas>
     
 </main>
     <footer>
